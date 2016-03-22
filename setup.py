@@ -6,5 +6,5 @@ setup(name='find-stuff',
       description='find-stuff',
       url='https://github.com/xpoh434/find-stuff/',
       packages=['find_stuff'],
-      install_requires=['whoosh','pdfminer']
+      install_requires=['whoosh','pdfminer','python-djvulibre','epub','pychm','bs4']
      )

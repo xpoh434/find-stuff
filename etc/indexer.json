@@ -1,1 +1,1 @@
-{"target_path": "./docs", "index_path": "./indexes", "indexables": [".epub",".html",".htm",".chm",".djvu",".txt",".docx",".rtf"]}
+{"target_path": "docs", "index_path": "indexes", "indexables": [".epub",".html",".htm",".chm",".djvu",".txt",".docx",".rtf",".pdf"]}

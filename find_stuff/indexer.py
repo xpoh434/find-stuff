@@ -16,10 +16,12 @@ import shutil
 import tempfile
 from zipfile import ZipFile
 
+import patoolib
 from whoosh.analysis.analyzers import StemmingAnalyzer
 from whoosh.fields import Schema, TEXT, ID, STORED
 from whoosh.index import create_in, open_dir
 from whoosh.util.text import rcompile
+
 
 try:
     from bs4 import BeautifulSoup
@@ -228,16 +230,16 @@ handlers[".chm"] = ChmHandler()
 handlers[".docx"] = DocxHandler()
 handlers[".rtf"] = RtfHandler()
 
-class ZipHandler(object):
+class ArchiveHandler(object):
     
     @contextmanager            
     def extract(self, filepath):
         try:
             tmp_dir = tempfile.mkdtemp()
-            with ZipFile(filepath,'r') as z:
-                tmppath = join(tmp_dir,os.path.basename(filepath))
-                os.makedirs(tmppath)
-                z.extractall(tmppath)
+            #with ZipFile(filepath,'r') as z:
+            tmppath = join(tmp_dir,os.path.basename(filepath))
+            os.makedirs(tmppath)
+            patoolib.extract_archive(filepath,outdir=tmppath)
                 
             yield tmppath
         finally:
@@ -248,8 +250,13 @@ class ZipHandler(object):
             return path in z.namelist()
         
 
+generic_archive_handler = ArchiveHandler()
+
 archive_handlers = {
-                    ".zip": ZipHandler()
+                    ".zip": generic_archive_handler,
+                    ".tar": generic_archive_handler,
+                    ".rar": generic_archive_handler,
+                    ".gz": generic_archive_handler
                     }
 
 def walk_path(path):
@@ -333,7 +340,7 @@ def incremental_index(ix, target_path, indexables, work_path):
                 # This file was deleted since it was indexed
                 logger.info("remove: %s", indexed_path)
                 writer.delete_by_term('path', indexed_path)
-
+            
             else:
                 # Check if this file was changed since it
                 # was indexed

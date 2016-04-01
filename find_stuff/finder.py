@@ -54,6 +54,7 @@ def main(argv):
                         else:
                             if p < results.pagecount:
                                 results = searcher.search_page(q, p+1, pagelen=20)
+                            break
                     if quit_:
                         break
             

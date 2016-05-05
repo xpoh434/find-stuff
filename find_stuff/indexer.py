@@ -18,12 +18,6 @@ import tarfile
 import tempfile
 from zipfile import ZipFile
 
-from rarfile import RarFile
-import rarfile
-
-if os.name == 'nt':
-    rarfile.UNRAR_TOOL = 'C:\\Program Files\\WinRAR\\unrar.exe'
-
 from whoosh.analysis.analyzers import StemmingAnalyzer
 from whoosh.fields import Schema, TEXT, ID, STORED
 from whoosh.index import create_in, open_dir
@@ -32,6 +26,18 @@ from whoosh.util.text import rcompile
 
 logger = getLogger("indexer")
 basicConfig(level="INFO")
+
+try:
+    from rarfile import RarFile
+    import rarfile
+    
+    if os.name == 'nt':
+        rarfile.UNRAR_TOOL = 'C:\\Program Files\\WinRAR\\unrar.exe'
+        
+    rar_support = False
+except:
+    logger.warn("failed to import rarfile")
+    rar_support = True
 
 try:
     from bs4 import BeautifulSoup
@@ -321,9 +327,11 @@ archive_handlers = {
                     ".zip": ZipHandler(),
                     ".tar": TarHandler(),
                     ".tar.gz": TarHandler(),
-                    ".rar": RarHandler(),
                     ".gz": GzipHandler(),
                     }
+
+if rar_support:
+    archive_handlers[".rar"] = RarHandler()
 
 def os_path(p):
     if os.name == 'nt':

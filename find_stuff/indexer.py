@@ -224,7 +224,8 @@ class PdfHandler(object):
                     except KeyboardInterrupt:
                         raise
                     except:
-                        logger.error("error occurred.")
+                        pass
+                        #logger.error("error occurred.")
             finally:
                 device.close()
                 txt= unicode(outfp.getvalue(),encoding='utf-8')
@@ -437,27 +438,35 @@ def incremental_index(ix, target_path, indexables, work_path):
                     filename = os.path.basename(real_path)
                     if index_path not in indexed_paths or index_path in to_index:
                         logger.info("indexing... %s", index_path)
-                        hdr = get_handler(ext)
-                        if hdr is None:
-                            content = "" 
-                        else:
-                            try:
+                        try:
+                            hdr = get_handler(ext)
+                            if hdr is None:
+                                content = "" 
+                            else:
                                 content = hdr.extract_content(real_path.encode('utf-8'))
-                                writer.add_document(title=filename, content=content,
-                                            path=std_path(index_path), filetype=ext, time=getmtime(path_join(target_path,archive_path)), real_path=std_path(archive_path))
-                                count+=1
-                            except KeyboardInterrupt:
-                                raise
-                            except:
-                                logger.exception("error occurred")
+                            writer.add_document(title=filename, content=content,
+                                        path=std_path(index_path), filetype=ext, time=getmtime(path_join(target_path,archive_path)), real_path=std_path(archive_path))
+                            count+=1
+                        except KeyboardInterrupt:
+                            raise
+                        except:
+                            logger.exception("error occurred")
+                
+                if count % 20 == 0 and count > 0:
+                    writer.commit()
+                    logger.info("indexed %d files",count)
+
+                    writer = ix.writer(limitmb=512, procs=multiprocessing.cpu_count())
+                    count = 0
 
         except KeyboardInterrupt:
             pass
         except:
             logger.exception("error occurred")
 
-        writer.commit()
-        logger.info("indexed %d files",count)
+        if count > 0:
+            writer.commit()
+            logger.info("indexed %d files",count)
 
 def main(argv):
     

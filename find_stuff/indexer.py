@@ -95,7 +95,7 @@ class TxtHandler(object):
 
 def to_utf8(v):
     if type(v) == str:
-        return unicode(v, encoding='utf-8')
+        return unicode(v, encoding='utf-8',errors='replace')
     return v
 
 #http://stackoverflow.com/questions/22799990/beatifulsoup4-get-text-still-has-javascript
